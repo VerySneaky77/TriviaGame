@@ -1,10 +1,9 @@
 // Timer specs
 const timerQuestionMax = 10000;
-const timerNewQuestion = 4000;
+const timerNewQuestion = 3000;
 
 // Progress tracking
 var currentProgress = 0;
-var previousProgress = 0;
 var currentCorrect = 0;
 var currectIncorrect = 0;
 
@@ -16,11 +15,13 @@ $(document).ready(function () {
     // Current answer
     var currentAnswerIndex;
     var currentAnswerString;
+
     // Timers
     var questionTimer;
     var timerTicker;
     var nextTickTime = timerQuestionMax;
 
+    // Questions data
     var questionsTree = [
         {
             question: "Which type of property was Old McDonald known for owning?",
@@ -46,6 +47,8 @@ $(document).ready(function () {
             answerIndex: 2
         }
     ]
+    //////////////////////////////////////////////////////
+    // Controls/Listeners
 
     $("button").on("click", function () {
         $("#button-container").addClass("no-show");
@@ -56,39 +59,97 @@ $(document).ready(function () {
         rigTimerTicker();
     });
 
-    // Question limit timer
+    $("input[name=answers]").on("change", function (e) {
+        // Clear timers
+        clearTimeout(questionTimer);
+        clearInterval(timerTicker);
+        // Check answer
+        timeUp(parseInt($(this).val()));
+    })
+    //
+    //////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////
+    // Timer funcs
+
+    // Current question timer
     function rigQuestionTimeout() {
         questionTimer = setTimeout(function () {
-            timeUp(2);
-        }, timerNewQuestion);
+
+            timeUp(-1);
+        }, timerQuestionMax);
     }
 
     // New question timer
     function rigNewQuestionTimer() {
         questionTimer = setTimeout(function () {
+            popQuiz();
             rigQuestionTimeout();
             rigTimerTicker();
+            $("#timer").text(Math.floor(nextTickTime / 1000));
         }, timerNewQuestion);
     }
 
     // Time remaining
     function rigTimerTicker() {
+        nextTickTime = timerQuestionMax;
+
         timerTicker = setInterval(function () {
-            nextTickTime--;
-            $("#timer").text(nextTickTime);
+            if (nextTickTime !== 0) {
+                nextTickTime -= 1000;
+                updateTimerUI();
+            }
+            else { clearInterval(timerTicker); }
         }, 1000);
     }
 
-    // Listen for input
-    $("input[name=answers]").on("change", function (e) {
-        // Clear timers
-        clearTimeout(questionTimer);
-        clearTimeout(rigTimerTicker);
-        // Check answer
-        timeUp(parseInt($(this).val()));
-    })
+    //
+    //////////////////////////////////////////////////////
+
+    //////////////////////////////////////////////////////
+    // UI Funcs
+
+    function updateQuestionUI(repopQuestion, disableRadios) {
+
+        if (repopQuestion) {
+            // Clear previous answers
+            $("input[name='answers']").prop("checked",false);
+            // Get new question and choices
+            $("#question-display").text(questionsTree[currentProgress].question);
+            $("#answer-display").text("The correct answer is: " + currentAnswerString);
+
+            // Populate selectable choices
+            for (let i = 0; i < $choiceRadios.length; i++) {
+                $choiceRadios[i].val(i);
+                $choiceLabels[i].text(questionsTree[currentProgress].choices[i]);
+            }
+        }
+        // Enable or disable radio buttons
+        $("input[name=answers]").attr("disabled", disableRadios);
+    }
+
+    function updateAnswerUI(reveal) {
+        // Hide or reveal answer
+        if (reveal) { $("#answer-row").removeClass("hide"); }
+        else { $("#answer-row").addClass("hide"); }
+    }
+
+    function updateTimerUI() {
+        $("#timer").text(Math.floor(nextTickTime / 1000));
+    }
+
+    function updateGameOverUI() {
+        $("#quiz-container").addClass("no-show");
+        $("#game-over-container").removeClass("no-show");
+
+        $("#results-correct").text(currentCorrect);
+        $("#results-incorrect").text(currectIncorrect);
+    }
+    //
+    //////////////////////////////////////////////////////
 
     function timeUp(choice) {
+        // Disable radio buttons
+        updateQuestionUI(false, true);
         // Correct selection
         if (choice === currentAnswerIndex) {
             $("#choice-display").text("Correct!");
@@ -105,45 +166,27 @@ $(document).ready(function () {
             currectIncorrect++;
         }
 
-        updateQAUI(false, true);
+        updateAnswerUI(true);
 
-        currentProgress++;
-        // Prep time before a new question pops
-        rigNewQuestionTimer();
+        if (currentProgress < questionsTree.length) {
+            // Prep time before a new question pops
+            rigNewQuestionTimer();
+        }
+        // Shoe game over
+        else {
+            updateGameOverUI();
+        }
     }
 
     function popQuiz() {
         // Check progress
-        if (currentProgress < questionsTree.length) {
-            currentAnswerIndex = questionsTree[currentProgress].answerIndex;
-            currentAnswerString = questionsTree[currentProgress].choices[currentAnswerIndex];
+        currentAnswerIndex = questionsTree[currentProgress].answerIndex;
+        currentAnswerString = questionsTree[currentProgress].choices[currentAnswerIndex];
 
-            // Update question and answer html
-            updateQAUI(true, false);
-        }
-    }
+        // Update question and answer html
+        updateAnswerUI(false);
+        updateQuestionUI(true, false);
 
-    function updateQAUI(hideAnswer, disableRadios) {
-        // Check if question needs reset
-        if (previousProgress !== currentProgress) {
-            $("#question-display").text(questionsTree[currentProgress].question);
-
-            // Populate selectable choices
-            for (let i = 0; i < $choiceRadios.length; i++) {
-                $choiceRadios[i].val(i);
-                $choiceLabels[i].text(questionsTree[currentProgress].choices[i]);
-            }
-
-            previousProgress = currentProgress;
-        }
-
-        // Hide or reveal answer
-        if (hideAnswer) { $("#answer-row").removeClass("hide"); }
-        else { $("#answer-row").addClass("hide"); }
-
-        // Populate correct answer choice
-        $("#answer-display").text("The correct answer is: " + currentAnswerString);
-        // Enable or disable radio buttons
-        $("input[name=answers]").attr("disabled", disableRadios);
+        currentProgress++;
     }
 });

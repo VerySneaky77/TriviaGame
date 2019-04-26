@@ -11,14 +11,14 @@
     <link rel="stylesheet" type="text/css" href="assets/css/style.css">
 </head>
 
-<body>
+<body class="bg-primary">
     <header class="container-fluid bg-light">
         <div class="container">
             <h1>Trivia Game</h1>
         </div>
     </header>
 
-    <div class="container-fluid bg-primary big-height pt-4">
+    <div class="container-fluid big-height pt-4">
         <div id="button-container" class="container">
             <div class="row">
                 <button class="col-4 offset-4 start-button">Click to Start</button>
@@ -27,7 +27,7 @@
 
         <div id="quiz-container" class="container bg-light no-show">
             <div class="row">
-                <h2 id="timer" class="col"></h2>
+                <h2 id="timer" class="col">10</h2>
             </div>
             <div class="row">
                 <p id="question-display" class="col"></p>
@@ -51,6 +51,15 @@
             <div id="answer-row" class="row mt-4 hide">
                 <p id="choice-display" class="col"></p>
                 <p id="answer-display" class="col"></p>
+            </div>
+        </div>
+
+        <div id="game-over-container" class="container bg-light no-show">
+            <div class="row">
+                <p class="col">Correct: <span id="results-correct"></span></p>
+            </div>
+            <div class="row">
+                <p class="col">Incorrect: <span id="results-incorrect"></span></p>
             </div>
         </div>
     </div>
