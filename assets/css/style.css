@@ -1,4 +1,38 @@
-.choice-display:hover {
+body {
+    background-color: white;
+}
+
+input[type="radio"] {
+    line-height: 1rem;
+    vertical-align: middle;
+    display: inline-block;
+}
+
+label {
+    display: inline-block;
+}
+
+.big-height {
+    min-height: 300px;
+}
+
+.start-button {
+    min-height: 160px;
+}
+
+.choices-row {
+    color: black;
+}
+
+.choices-row:hover {
     background-color: rgba(46,46,46,0.7);
     color: white;
+}
+
+.no-show {
+    display: none;
+}
+
+.hide {
+    visibility: hidden;
 }
