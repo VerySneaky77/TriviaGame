@@ -82,10 +82,17 @@ $(document).ready(function () {
     // New question timer
     function rigNewQuestionTimer() {
         questionTimer = setTimeout(function () {
-            popQuiz();
-            rigQuestionTimeout();
-            rigTimerTicker();
-            $("#timer").text(Math.floor(nextTickTime / 1000));
+            // Only pop new question if there are more questions
+            if (currentProgress < questionsTree.length) {
+                popQuiz();
+                rigQuestionTimeout();
+                rigTimerTicker();
+                $("#timer").text(Math.floor(nextTickTime / 1000));
+            }
+            // Shoe game over
+            else {
+                updateGameOverUI();
+            }
         }, timerNewQuestion);
     }
 
@@ -112,7 +119,7 @@ $(document).ready(function () {
 
         if (repopQuestion) {
             // Clear previous answers
-            $("input[name='answers']").prop("checked",false);
+            $("input[name='answers']").prop("checked", false);
             // Get new question and choices
             $("#question-display").text(questionsTree[currentProgress].question);
             $("#answer-display").text("The correct answer is: " + currentAnswerString);
@@ -168,14 +175,8 @@ $(document).ready(function () {
 
         updateAnswerUI(true);
 
-        if (currentProgress < questionsTree.length) {
-            // Prep time before a new question pops
-            rigNewQuestionTimer();
-        }
-        // Shoe game over
-        else {
-            updateGameOverUI();
-        }
+        // Prep time before a new question pops
+        rigNewQuestionTimer();
     }
 
     function popQuiz() {
